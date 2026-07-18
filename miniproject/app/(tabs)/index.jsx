@@ -19,15 +19,17 @@ export default function Dashboard() {
       <Header />
 
       <View style={styles.content}>
+        {/* Info Card */}
         <InfoCard title="Today's Surveys" value="5" />
 
+        {/* Quick Actions */}
         <Text style={styles.section}>Quick Actions</Text>
 
         {/* Row 1 */}
         <View style={styles.row}>
           <ActionCard
             title="New Survey"
-            onPress={() => router.push('/new-survey')}
+            onPress={() => router.push('/(tabs)/new-survey')}
           />
           <ActionCard
             title="Camera"
@@ -47,7 +49,7 @@ export default function Dashboard() {
           />
         </View>
 
-        {/* Row 3 (optional but useful) */}
+        {/* Row 3 */}
         <View style={styles.row}>
           <ActionCard
             title="Clipboard"
@@ -55,10 +57,11 @@ export default function Dashboard() {
           />
           <ActionCard
             title="History"
-            onPress={() => router.push('/history')}
+            onPress={() => router.push('/(tabs)/history')}
           />
         </View>
 
+        {/* Recent Surveys */}
         <Text style={styles.section}>Recent Surveys</Text>
 
         <FlatList
@@ -85,7 +88,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     marginTop: 18,
-    marginBottom: 6,
+    marginBottom: 8,
     color: COLORS.text,
   },
   row: {
