@@ -4,8 +4,10 @@ import InfoCard from '../../components/InfoCard';
 import ActionCard from '../../components/ActionCard';
 import SurveyItem from '../../components/SurveyItem';
 import { COLORS } from '../../constants/theme';
+import { useRouter } from 'expo-router';
 
 export default function Dashboard() {
+  const router = useRouter();
 
   const surveys = [
     { id: '1', site: 'Site A', client: 'Client X' },
@@ -14,23 +16,47 @@ export default function Dashboard() {
 
   return (
     <View style={styles.container}>
-
       <Header />
 
       <View style={styles.content}>
-
         <InfoCard title="Today's Surveys" value="5" />
 
         <Text style={styles.section}>Quick Actions</Text>
 
+        {/* Row 1 */}
         <View style={styles.row}>
-          <ActionCard title="New Survey" />
-          <ActionCard title="Camera" />
+          <ActionCard
+            title="New Survey"
+            onPress={() => router.push('/new-survey')}
+          />
+          <ActionCard
+            title="Camera"
+            onPress={() => router.push('/camera')}
+          />
         </View>
 
+        {/* Row 2 */}
         <View style={styles.row}>
-          <ActionCard title="Location" />
-          <ActionCard title="Contacts" />
+          <ActionCard
+            title="Location"
+            onPress={() => router.push('/location')}
+          />
+          <ActionCard
+            title="Contacts"
+            onPress={() => router.push('/contacts')}
+          />
+        </View>
+
+        {/* Row 3 (optional but useful) */}
+        <View style={styles.row}>
+          <ActionCard
+            title="Clipboard"
+            onPress={() => router.push('/clipboard')}
+          />
+          <ActionCard
+            title="History"
+            onPress={() => router.push('/history')}
+          />
         </View>
 
         <Text style={styles.section}>Recent Surveys</Text>
@@ -41,7 +67,6 @@ export default function Dashboard() {
           renderItem={({ item }) => <SurveyItem item={item} />}
           showsVerticalScrollIndicator={false}
         />
-
       </View>
     </View>
   );
@@ -54,7 +79,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    marginTop: -20, 
+    marginTop: -20,
   },
   section: {
     fontSize: 16,
