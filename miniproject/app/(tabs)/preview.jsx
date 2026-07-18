@@ -7,7 +7,7 @@ import {
   ScrollView,
   Alert,
 } from 'react-native';
-import { useSurveyStore, resetSurveyData } from '../../constants/store';
+import { useSurveyStore, resetSurveyData, addSurveyToHistory } from '../../constants/store';
 import Header from '../../components/Header';
 import { useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
@@ -32,6 +32,7 @@ export default function PreviewScreen() {
         {
           text: 'Submit',
           onPress: () => {
+            addSurveyToHistory(store);
             Alert.alert('Success ✓', 'Survey submitted successfully!');
             resetSurveyData();
             router.push('/(tabs)/');

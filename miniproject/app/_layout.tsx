@@ -29,13 +29,24 @@ export default function RootLayout() {
         },
       }}
     >
-      {/* Home (Tabs) */}
+      {/* Dashboard (Tabs) */}
       <Drawer.Screen
         name="(tabs)"
         options={{
-          title: 'Home',
+          title: 'Dashboard',
           drawerIcon: ({ color, size }) => (
             <Ionicons name="grid-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Survey */}
+      <Drawer.Screen
+        name="(tabs)/new-survey"
+        options={{
+          title: 'Survey',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="document-text-outline" size={size} color={color} />
           ),
         }}
       />
@@ -80,6 +91,17 @@ export default function RootLayout() {
           title: 'Clipboard',
           drawerIcon: ({ color, size }) => (
             <Ionicons name="clipboard-outline" size={size} color={color} />
+          ),
+        }}
+      />
+
+      {/* Settings */}
+      <Drawer.Screen
+        name="settings"
+        options={{
+          title: 'Settings',
+          drawerIcon: ({ color, size }) => (
+            <Ionicons name="settings-outline" size={size} color={color} />
           ),
         }}
       />
