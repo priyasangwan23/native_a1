@@ -72,3 +72,8 @@ export const CARD_COLORS = {
   'Clipboard':   ['#070269ff', '#2b0b61ff'],  // Purple → Violet
   'History':     ['#070269ff', '#2b0b61ff'],  // Pink
 };
+
+export const Fonts = {
+  rounded: 'System',
+  mono: 'monospace',
+};

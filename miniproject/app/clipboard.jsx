@@ -12,6 +12,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { RADIUS } from '../constants/theme';
+import { useSurveyStore, updateSurveyField } from '../constants/store';
 
 const ACCENT = '#070355';
 
@@ -34,7 +35,7 @@ const COPY_ITEMS = [
 ];
 
 export default function ClipboardScreen() {
-  const [notes, setNotes]           = useState('');
+  const store = useSurveyStore();
   const [pastedText, setPastedText] = useState('');
 
   const copyItem = async (item) => {
@@ -45,13 +46,17 @@ export default function ClipboardScreen() {
   const pasteFromClipboard = async () => {
     const text = await Clipboard.getStringAsync();
     setPastedText(text);
+    if (text) {
+      const updatedNotes = store.notes ? `${store.notes}\n${text}` : text;
+      updateSurveyField('notes', updatedNotes);
+    }
   };
 
   const clearClipboard = async () => {
     await Clipboard.setStringAsync('');
     setPastedText('');
-    setNotes('');
-    Alert.alert('Cleared', 'Clipboard cleared');
+    updateSurveyField('notes', '');
+    Alert.alert('Cleared', 'Clipboard and notes cleared');
   };
 
   return (
@@ -95,8 +100,8 @@ export default function ClipboardScreen() {
             <TextInput
               placeholder="Write or paste notes here..."
               placeholderTextColor="#94A3B8"
-              value={notes}
-              onChangeText={setNotes}
+              value={store.notes}
+              onChangeText={(text) => updateSurveyField('notes', text)}
               style={styles.textarea}
               multiline
               textAlignVertical="top"

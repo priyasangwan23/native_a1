@@ -13,6 +13,7 @@ import MapView, { Marker } from 'react-native-maps';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { RADIUS } from '../constants/theme';
+import { updateSurveyField } from '../constants/store';
 
 const ACCENT = '#070355';
 
@@ -31,11 +32,21 @@ export default function LocationScreen() {
     }
     const loc = await Location.getCurrentPositionAsync({ accuracy: Location.Accuracy.High });
     setLocation(loc);
+    let addrText = '';
     const addr = await Location.reverseGeocodeAsync({
       latitude: loc.coords.latitude,
       longitude: loc.coords.longitude,
     });
-    if (addr.length > 0) setAddress(addr[0]);
+    if (addr.length > 0) {
+      const a = addr[0];
+      setAddress(a);
+      const parts = [a.city, a.region, a.country].filter(Boolean);
+      if (parts.length > 0) {
+        addrText = ` - ${parts.join(', ')}`;
+      }
+    }
+    const formatted = `Lat: ${loc.coords.latitude.toFixed(4)}, Lng: ${loc.coords.longitude.toFixed(4)}${addrText}`;
+    updateSurveyField('location', formatted);
     setLoading(false);
   };
 

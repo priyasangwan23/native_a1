@@ -4,8 +4,10 @@ import {
 } from 'react-native';
 import { useState } from 'react';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import Header from '../../components/Header';
 import { COLORS, RADIUS, SHADOWS } from '../../constants/theme';
+import { useSurveyStore, updateSurveyField } from '../../constants/store';
 
 const ACCENT = '#070355';
 
@@ -16,40 +18,32 @@ const PRIORITY_CONFIG = [
 ];
 
 export default function NewSurvey() {
-  const [siteName, setSiteName]       = useState('');
-  const [clientName, setClientName]   = useState('');
-  const [description, setDescription] = useState('');
-  const [priority, setPriority]       = useState('');
-  const [date, setDate]               = useState('');
-  const [errors, setErrors]           = useState({});
+  const store = useSurveyStore();
+  const router = useRouter();
+  const [errors, setErrors] = useState({});
 
   const validate = () => {
     let newErrors = {};
-    if (!siteName)    newErrors.siteName    = 'Site name is required';
-    if (!clientName)  newErrors.clientName  = 'Client name is required';
-    if (!priority)    newErrors.priority    = 'Select a priority';
-    if (!date)        newErrors.date        = 'Date is required';
+    if (!store.siteName)    newErrors.siteName    = 'Site name is required';
+    if (!store.clientName)  newErrors.clientName  = 'Client name is required';
+    if (!store.priority)    newErrors.priority    = 'Select a priority';
+    if (!store.date)        newErrors.date        = 'Date is required';
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = () => {
     if (!validate()) return;
-    Alert.alert('Success', 'Survey Created Successfully');
-    setSiteName('');
-    setClientName('');
-    setDescription('');
-    setPriority('');
-    setDate('');
+    router.push('/(tabs)/preview');
   };
 
   const InputField = ({ icon, placeholder, value, onChangeText, multiline, errorKey }) => (
     <View style={{ marginBottom: 4 }}>
       <View style={[styles.inputWrap, errors[errorKey] && styles.inputError]}>
-        <Ionicons name={icon} size={18} color={COLORS.subtext} style={styles.inputIcon} />
+        <Ionicons name={icon} size={18} color="#64748B" style={styles.inputIcon} />
         <TextInput
           placeholder={placeholder}
-          placeholderTextColor={COLORS.textLight}
+          placeholderTextColor="#94A3B8"
           value={value}
           onChangeText={onChangeText}
           style={[styles.input, multiline && styles.multiline]}
@@ -58,7 +52,7 @@ export default function NewSurvey() {
       </View>
       {errors[errorKey] && (
         <View style={styles.errorRow}>
-          <Ionicons name="alert-circle-outline" size={13} color={COLORS.danger} />
+          <Ionicons name="alert-circle-outline" size={13} color="#EF4444" />
           <Text style={styles.error}> {errors[errorKey]}</Text>
         </View>
       )}
@@ -81,29 +75,29 @@ export default function NewSurvey() {
           <InputField
             icon="business-outline"
             placeholder="Site Name"
-            value={siteName}
-            onChangeText={setSiteName}
+            value={store.siteName}
+            onChangeText={(text) => updateSurveyField('siteName', text)}
             errorKey="siteName"
           />
           <InputField
             icon="person-outline"
             placeholder="Client Name"
-            value={clientName}
-            onChangeText={setClientName}
+            value={store.clientName}
+            onChangeText={(text) => updateSurveyField('clientName', text)}
             errorKey="clientName"
           />
           <InputField
             icon="document-text-outline"
             placeholder="Description (optional)"
-            value={description}
-            onChangeText={setDescription}
+            value={store.description}
+            onChangeText={(text) => updateSurveyField('description', text)}
             multiline
           />
           <InputField
             icon="calendar-outline"
             placeholder="Date  (e.g. 18-07-2026)"
-            value={date}
-            onChangeText={setDate}
+            value={store.date}
+            onChangeText={(text) => updateSurveyField('date', text)}
             errorKey="date"
           />
         </View>
@@ -113,11 +107,11 @@ export default function NewSurvey() {
           <Text style={styles.cardTitle}>Priority Level</Text>
           <View style={styles.priorityRow}>
             {PRIORITY_CONFIG.map((item) => {
-              const isSelected = priority === item.label;
+              const isSelected = store.priority === item.label;
               return (
                 <Pressable
                   key={item.label}
-                  onPress={() => setPriority(item.label)}
+                  onPress={() => updateSurveyField('priority', item.label)}
                   style={({ pressed }) => [
                     styles.priorityBtn,
                     isSelected && { backgroundColor: ACCENT, borderColor: ACCENT },
@@ -139,7 +133,7 @@ export default function NewSurvey() {
           </View>
           {errors.priority && (
             <View style={styles.errorRow}>
-              <Ionicons name="alert-circle-outline" size={13} color={COLORS.danger} />
+              <Ionicons name="alert-circle-outline" size={13} color="#EF4444" />
               <Text style={styles.error}> {errors.priority}</Text>
             </View>
           )}
@@ -150,8 +144,8 @@ export default function NewSurvey() {
           onPress={handleSubmit}
           style={({ pressed }) => [styles.submitBtn, pressed && { opacity: 0.85 }]}
         >
-          <Ionicons name="checkmark-circle-outline" size={22} color="#fff" />
-          <Text style={styles.submitText}>Submit Survey</Text>
+          <Ionicons name="eye-outline" size={20} color="#fff" />
+          <Text style={styles.submitText}>Preview Survey</Text>
         </Pressable>
 
         <View style={{ height: 30 }} />

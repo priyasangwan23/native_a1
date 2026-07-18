@@ -15,6 +15,7 @@ import * as Clipboard from 'expo-clipboard';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { RADIUS } from '../constants/theme';
+import { updateSurveyField } from '../constants/store';
 
 const ACCENT = '#070355';
 
@@ -56,10 +57,14 @@ export default function ContactsScreen() {
     setRefreshing(false);
   };
 
-  const copyNumber = async (number) => {
-    if (!number) { Alert.alert('No Number Available'); return; }
-    await Clipboard.setStringAsync(number);
-    Alert.alert('Copied', 'Number copied to clipboard');
+  const selectContact = async (item) => {
+    const number = item.phoneNumbers?.[0]?.number;
+    if (number) {
+      await Clipboard.setStringAsync(number);
+    }
+    const formatted = number ? `${item.name} (${number})` : item.name;
+    updateSurveyField('contact', formatted);
+    Alert.alert('Contact Selected', `${formatted}\nSelected and copied to clipboard.`);
   };
 
   const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
@@ -70,7 +75,7 @@ export default function ContactsScreen() {
     return (
       <Pressable
         style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
-        onPress={() => copyNumber(number)}
+        onPress={() => selectContact(item)}
       >
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{getInitial(item.name)}</Text>

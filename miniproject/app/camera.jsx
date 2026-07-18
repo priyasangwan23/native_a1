@@ -6,12 +6,13 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
 import { COLORS, RADIUS } from '../constants/theme';
+import { surveyData, updateSurveyField } from '../constants/store';
 
 const ACCENT = '#070355';
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [photo, setPhoto]               = useState(null);
+  const [photo, setPhoto]               = useState(surveyData.photo);
   const [loading, setLoading]           = useState(true);
   const [time, setTime]                 = useState('');
 
@@ -27,17 +28,22 @@ export default function CameraScreen() {
     if (!cameraRef.current) return;
     const result = await cameraRef.current.takePictureAsync();
     setPhoto(result.uri);
+    updateSurveyField('photo', result.uri);
     setTime(new Date().toLocaleString());
   };
 
   const retake = () => {
     setPhoto(null);
+    updateSurveyField('photo', null);
   };
 
   const deletePhoto = () => {
     Alert.alert('Delete Photo', 'Are you sure?', [
       { text: 'Cancel' },
-      { text: 'Delete', onPress: () => setPhoto(null), style: 'destructive' },
+      { text: 'Delete', onPress: () => {
+        setPhoto(null);
+        updateSurveyField('photo', null);
+      }, style: 'destructive' },
     ]);
   };
 

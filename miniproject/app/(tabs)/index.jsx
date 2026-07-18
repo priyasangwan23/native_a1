@@ -180,7 +180,7 @@ export default function Dashboard() {
         <View style={[styles.card, styles.activityStrip]}>
           <Ionicons name="trending-up-outline" size={20} color={ACCENT} />
           <View style={{ flex: 1, marginLeft: 12 }}>
-            <Text style={styles.stripTitle}>This week's best day</Text>
+            <Text style={styles.stripTitle}>{"This week's best day"}</Text>
             <Text style={styles.stripSub}>Thursday — 7 surveys completed</Text>
           </View>
           <Text style={styles.stripBadge}>🏆</Text>
