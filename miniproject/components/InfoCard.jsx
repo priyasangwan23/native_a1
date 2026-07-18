@@ -1,35 +1,55 @@
 import { View, Text, StyleSheet } from 'react-native';
-import { COLORS } from '../constants/theme';
+import { Ionicons } from '@expo/vector-icons';
+import { RADIUS } from '../constants/theme';
 
-export default function InfoCard({ title, value }) {
+const ACCENT = '#070355';
+
+export default function InfoCard({ title, value, icon = 'clipboard-outline', color = ACCENT }) {
   return (
     <View style={styles.card}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={[styles.iconWrap, { backgroundColor: color + '12' }]}>
+        <Ionicons name={icon} size={22} color={color} />
+      </View>
       <Text style={styles.value}>{value}</Text>
+      <Text style={styles.title}>{title}</Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: COLORS.card,
-    padding: 18,
-    borderRadius: 16,
-    marginVertical: 12,
-
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.md,
+    padding: 16,
+    marginVertical: 5,
+    borderWidth: 1,
+    borderColor: '#EAECF0',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
-    shadowRadius: 10,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 4,
+    elevation: 1,
   },
-  title: {
-    color: COLORS.subtext,
-    fontSize: 13,
+  iconWrap: {
+    width: 40,
+    height: 40,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 10,
   },
   value: {
-    fontSize: 26,
-    fontWeight: '700',
-    color: COLORS.text,
-    marginTop: 5,
+    fontSize: 28,
+    fontWeight: '800',
+    color: '#0F172A',
+    letterSpacing: -0.5,
+  },
+  title: {
+    fontSize: 12,
+    color: '#64748B',
+    fontWeight: '500',
+    marginTop: 3,
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
   },
 });

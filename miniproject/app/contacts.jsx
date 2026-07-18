@@ -12,89 +12,77 @@ import {
 import { useState, useEffect } from 'react';
 import * as Contacts from 'expo-contacts';
 import * as Clipboard from 'expo-clipboard';
+import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import { RADIUS } from '../constants/theme';
+
+const ACCENT = '#070355';
 
 export default function ContactsScreen() {
-  const [contacts, setContacts] = useState([]);
-  const [filtered, setFiltered] = useState([]);
-  const [search, setSearch] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [contacts, setContacts]   = useState([]);
+  const [filtered, setFiltered]   = useState([]);
+  const [search, setSearch]       = useState('');
+  const [loading, setLoading]     = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // 📞 Fetch Contacts
   const getContacts = async () => {
     setLoading(true);
-
     const { status } = await Contacts.requestPermissionsAsync();
-
     if (status !== 'granted') {
       Alert.alert('Permission Denied');
       setLoading(false);
       return;
     }
-
     const { data } = await Contacts.getContactsAsync({
       fields: [Contacts.Fields.PhoneNumbers],
     });
-
     setContacts(data);
     setFiltered(data);
     setLoading(false);
   };
 
-  useEffect(() => {
-    getContacts();
-  }, []);
+  useEffect(() => { getContacts(); }, []);
 
-  // 🔍 Search
   const handleSearch = (text) => {
     setSearch(text);
-
-    const filteredData = contacts.filter((item) =>
+    setFiltered(contacts.filter((item) =>
       item.name?.toLowerCase().includes(text.toLowerCase())
-    );
-
-    setFiltered(filteredData);
+    ));
   };
 
-  // 🔄 Pull to refresh
   const onRefresh = async () => {
     setRefreshing(true);
     await getContacts();
     setRefreshing(false);
   };
 
-  // 📋 Copy Number
   const copyNumber = async (number) => {
-    if (!number) {
-      Alert.alert('No Number Available');
-      return;
-    }
-
+    if (!number) { Alert.alert('No Number Available'); return; }
     await Clipboard.setStringAsync(number);
     Alert.alert('Copied', 'Number copied to clipboard');
   };
 
-  // 👤 Avatar (Initial)
-  const getInitial = (name) => {
-    return name ? name.charAt(0).toUpperCase() : '?';
-  };
+  const getInitial = (name) => name ? name.charAt(0).toUpperCase() : '?';
 
-  // 📄 Render Item
   const renderItem = ({ item }) => {
     const number = item.phoneNumbers?.[0]?.number;
 
     return (
-      <Pressable style={styles.card} onPress={() => copyNumber(number)}>
+      <Pressable
+        style={({ pressed }) => [styles.card, pressed && { opacity: 0.85 }]}
+        onPress={() => copyNumber(number)}
+      >
         <View style={styles.avatar}>
           <Text style={styles.avatarText}>{getInitial(item.name)}</Text>
         </View>
 
-        <View>
+        <View style={styles.cardContent}>
           <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.number}>
-            {number || 'No Number'}
-          </Text>
+          <Text style={styles.number}>{number || 'No Number'}</Text>
+        </View>
+
+        <View style={styles.copyIcon}>
+          <Ionicons name="copy-outline" size={16} color="#94A3B8" />
         </View>
       </Pressable>
     );
@@ -104,35 +92,55 @@ export default function ContactsScreen() {
     <View style={styles.container}>
       <Header title="Contacts" />
 
-      {/* 🔍 Search */}
-      <TextInput
-        placeholder="Search contacts..."
-        value={search}
-        onChangeText={handleSearch}
-        style={styles.search}
-      />
+      {/* Search Bar */}
+      <View style={styles.searchWrap}>
+        <Ionicons name="search-outline" size={18} color="#64748B" style={styles.searchIcon} />
+        <TextInput
+          placeholder="Search contacts..."
+          placeholderTextColor="#94A3B8"
+          value={search}
+          onChangeText={handleSearch}
+          style={styles.search}
+        />
+        {search.length > 0 && (
+          <Pressable onPress={() => handleSearch('')}>
+            <Ionicons name="close-circle" size={18} color="#64748B" />
+          </Pressable>
+        )}
+      </View>
 
-      {/* 📊 Count */}
-      <Text style={styles.count}>
-        Total Contacts: {filtered.length}
-      </Text>
+      {/* Count Badge */}
+      <View style={styles.countWrap}>
+        <View style={styles.countBadge}>
+          <Ionicons name="people-outline" size={14} color={ACCENT} />
+          <Text style={styles.countText}>{filtered.length} Contacts</Text>
+        </View>
+      </View>
 
-      {/* ⏳ Loading */}
       {loading ? (
-        <ActivityIndicator size="large" style={{ marginTop: 20 }} />
-      ) : filtered.length === 0 ? (
-        // ❌ Empty State
         <View style={styles.center}>
-          <Text>No Contacts Found</Text>
+          <ActivityIndicator size="large" color={ACCENT} />
+          <Text style={styles.loadingText}>Loading Contacts...</Text>
+        </View>
+      ) : filtered.length === 0 ? (
+        <View style={styles.center}>
+          <Ionicons name="person-outline" size={44} color="#94A3B8" />
+          <Text style={styles.emptyTitle}>No Contacts Found</Text>
+          <Text style={styles.emptySubtitle}>Try a different search term</Text>
         </View>
       ) : (
-        // 📋 List
         <FlatList
           data={filtered}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
           refreshControl={
-            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+              tintColor={ACCENT}
+            />
           }
         />
       )}
@@ -141,59 +149,111 @@ export default function ContactsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
-
-  search: {
-    margin: 10,
-    padding: 10,
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FB',
+  },
+  searchWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    margin: 14,
+    borderRadius: RADIUS.md,
+    paddingHorizontal: 14,
     borderWidth: 1,
-    borderRadius: 10,
+    borderColor: '#EAECF0',
   },
-
-  count: {
-    marginLeft: 10,
-    marginBottom: 5,
-    fontWeight: '600',
+  searchIcon: {
+    marginRight: 8,
   },
-
+  search: {
+    flex: 1,
+    paddingVertical: 12,
+    fontSize: 14,
+    color: '#0F172A',
+  },
+  countWrap: {
+    paddingHorizontal: 14,
+    marginBottom: 4,
+  },
+  countBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    backgroundColor: ACCENT + '0D',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  countText: {
+    color: ACCENT,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  list: {
+    padding: 14,
+    paddingTop: 8,
+  },
   card: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: '#fff',
+    borderRadius: RADIUS.md,
     padding: 12,
-    marginHorizontal: 10,
-    marginVertical: 5,
-    backgroundColor: '#f1f5f9',
-    borderRadius: 10,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: '#EAECF0',
   },
-
   avatar: {
-    width: 45,
-    height: 45,
-    borderRadius: 50,
-    backgroundColor: '#2563EB',
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
     justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 12,
+    marginRight: 14,
+    backgroundColor: ACCENT + '0D',
   },
-
   avatarText: {
-    color: '#fff',
+    color: ACCENT,
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '800',
   },
-
+  cardContent: {
+    flex: 1,
+  },
   name: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#0F172A',
   },
-
   number: {
-    color: 'gray',
-    fontSize: 13,
+    color: '#64748B',
+    fontSize: 12,
+    marginTop: 2,
   },
-
+  copyIcon: {
+    padding: 6,
+  },
   center: {
+    flex: 1,
     alignItems: 'center',
-    marginTop: 40,
+    justifyContent: 'center',
+    gap: 8,
+  },
+  loadingText: {
+    color: '#64748B',
+    fontSize: 14,
+    marginTop: 10,
+  },
+  emptyTitle: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: '#0F172A',
+    marginTop: 8,
+  },
+  emptySubtitle: {
+    fontSize: 12,
+    color: '#64748B',
   },
 });

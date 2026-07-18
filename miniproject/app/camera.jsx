@@ -1,15 +1,19 @@
-import { 
-  View, Text, StyleSheet, Pressable, Image, Alert, ActivityIndicator 
+import {
+  View, Text, StyleSheet, Pressable, Image, Alert, ActivityIndicator
 } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import { Ionicons } from '@expo/vector-icons';
 import Header from '../components/Header';
+import { COLORS, RADIUS } from '../constants/theme';
+
+const ACCENT = '#070355';
 
 export default function CameraScreen() {
   const [permission, requestPermission] = useCameraPermissions();
-  const [photo, setPhoto] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [time, setTime] = useState('');
+  const [photo, setPhoto]               = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [time, setTime]                 = useState('');
 
   const cameraRef = useRef(null);
 
@@ -19,54 +23,58 @@ export default function CameraScreen() {
     }
   }, [permission]);
 
-  //  Take Photo
   const takePicture = async () => {
     if (!cameraRef.current) return;
-
     const result = await cameraRef.current.takePictureAsync();
     setPhoto(result.uri);
     setTime(new Date().toLocaleString());
   };
 
-  // Retake
   const retake = () => {
     setPhoto(null);
   };
 
-  // 🗑 Delete
   const deletePhoto = () => {
-    Alert.alert(
-      "Delete Photo",
-      "Are you sure?",
-      [
-        { text: "Cancel" },
-        { text: "Delete", onPress: () => setPhoto(null) }
-      ]
-    );
+    Alert.alert('Delete Photo', 'Are you sure?', [
+      { text: 'Cancel' },
+      { text: 'Delete', onPress: () => setPhoto(null), style: 'destructive' },
+    ]);
   };
 
-  //  No permission
-  if (!permission) {
-    return <View />;
-  }
+  if (!permission) return <View />;
 
   if (!permission.granted) {
     return (
-      <View style={styles.center}>
-        <Text>Camera permission required</Text>
-        <Pressable style={styles.button} onPress={requestPermission}>
-          <Text style={styles.buttonText}>Allow Camera</Text>
-        </Pressable>
+      <View style={styles.container}>
+        <Header title="Camera" />
+        <View style={styles.center}>
+          <View style={styles.permissionIcon}>
+            <Ionicons name="camera-off-outline" size={50} color={ACCENT} />
+          </View>
+          <Text style={styles.permissionTitle}>Camera Access Needed</Text>
+          <Text style={styles.permissionSub}>
+            Please allow camera access to capture survey photos.
+          </Text>
+          <Pressable
+            onPress={requestPermission}
+            style={({ pressed }) => [styles.permissionBtn, pressed && { opacity: 0.8 }]}
+          >
+            <Ionicons name="camera-outline" size={18} color="#fff" />
+            <Text style={styles.permissionBtnText}>Allow Camera</Text>
+          </Pressable>
+        </View>
       </View>
     );
   }
 
-  //  Loading
   if (loading) {
     return (
-      <View style={styles.center}>
-        <ActivityIndicator size="large" />
-        <Text>Opening Camera...</Text>
+      <View style={styles.container}>
+        <Header title="Camera" />
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={ACCENT} />
+          <Text style={styles.loadingText}>Opening Camera...</Text>
+        </View>
       </View>
     );
   }
@@ -75,32 +83,48 @@ export default function CameraScreen() {
     <View style={styles.container}>
       <Header title="Camera" />
 
-      {/*  Camera or Preview */}
+      {/* Camera or Preview */}
       {!photo ? (
         <CameraView style={styles.camera} ref={cameraRef} />
       ) : (
         <View style={styles.preview}>
           <Image source={{ uri: photo }} style={styles.image} />
-          <Text style={styles.time}>Captured: {time}</Text>
+          <View style={styles.timeBadge}>
+            <Ionicons name="time-outline" size={14} color="#64748B" />
+            <Text style={styles.timeText}>Captured: {time}</Text>
+          </View>
         </View>
       )}
 
-      {/* Buttons */}
+      {/* Controls */}
       <View style={styles.controls}>
         {!photo ? (
-          <Pressable style={styles.captureBtn} onPress={takePicture}>
-            <Text style={styles.text}>Capture</Text>
+          <Pressable
+            onPress={takePicture}
+            style={({ pressed }) => [styles.captureOuter, pressed && { opacity: 0.85 }]}
+          >
+            <View style={styles.captureBtn}>
+              <Ionicons name="camera" size={28} color="#fff" />
+            </View>
           </Pressable>
         ) : (
-          <>
-            <Pressable style={styles.btn} onPress={retake}>
-              <Text style={styles.text}>Retake</Text>
+          <View style={styles.actionRow}>
+            <Pressable
+              onPress={retake}
+              style={({ pressed }) => [styles.actionBtn, { backgroundColor: ACCENT }, pressed && { opacity: 0.8 }]}
+            >
+              <Ionicons name="refresh-outline" size={18} color="#fff" />
+              <Text style={styles.actionText}>Retake</Text>
             </Pressable>
 
-            <Pressable style={styles.deleteBtn} onPress={deletePhoto}>
-              <Text style={styles.text}>Delete</Text>
+            <Pressable
+              onPress={deletePhoto}
+              style={({ pressed }) => [styles.actionBtn, { backgroundColor: '#EF4444' }, pressed && { opacity: 0.8 }]}
+            >
+              <Ionicons name="trash-outline" size={18} color="#fff" />
+              <Text style={styles.actionText}>Delete</Text>
             </Pressable>
-          </>
+          </View>
         )}
       </View>
     </View>
@@ -108,57 +132,125 @@ export default function CameraScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F9FB',
+  },
   camera: { flex: 1 },
-  preview: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  image: { width: '90%', height: '70%', borderRadius: 10 },
-  time: { marginTop: 10 },
-
-  controls: {
-    flexDirection: 'row',
+  preview: {
+    flex: 1,
+    alignItems: 'center',
     justifyContent: 'center',
-    padding: 15,
+    padding: 16,
+    backgroundColor: '#F8F9FB',
   },
-
+  image: {
+    width: '100%',
+    height: '75%',
+    borderRadius: RADIUS.md,
+    borderWidth: 1,
+    borderColor: '#EAECF0',
+  },
+  timeBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    backgroundColor: '#fff',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#EAECF0',
+  },
+  timeText: {
+    color: '#64748B',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  controls: {
+    padding: 20,
+    alignItems: 'center',
+    backgroundColor: '#fff',
+    borderTopWidth: 1,
+    borderTopColor: '#EAECF0',
+  },
+  captureOuter: {
+    borderRadius: 999,
+    padding: 4,
+    borderWidth: 3,
+    borderColor: ACCENT + '20',
+  },
   captureBtn: {
-    backgroundColor: '#2563EB',
-    padding: 15,
-    borderRadius: 50,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: ACCENT,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-
-  btn: {
-    backgroundColor: '#2563EB',
-    padding: 12,
-    borderRadius: 10,
-    marginHorizontal: 10,
+  actionRow: {
+    flexDirection: 'row',
+    gap: 16,
   },
-
-  deleteBtn: {
-    backgroundColor: 'red',
-    padding: 12,
-    borderRadius: 10,
-    marginHorizontal: 10,
+  actionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 13,
+    borderRadius: RADIUS.md,
   },
-
-  text: {
+  actionText: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '700',
+    fontSize: 14,
   },
-
   center: {
     flex: 1,
-    justifyContent: 'center',
     alignItems: 'center',
+    justifyContent: 'center',
+    padding: 30,
   },
-
-  button: {
-    marginTop: 10,
-    backgroundColor: '#2563EB',
-    padding: 10,
-    borderRadius: 8,
+  permissionIcon: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    backgroundColor: ACCENT + '0D',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 20,
   },
-
-  buttonText: {
+  permissionTitle: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: '#0F172A',
+    marginBottom: 8,
+  },
+  permissionSub: {
+    fontSize: 13,
+    color: '#64748B',
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 24,
+  },
+  permissionBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 24,
+    paddingVertical: 13,
+    borderRadius: RADIUS.md,
+    backgroundColor: ACCENT,
+  },
+  permissionBtnText: {
     color: '#fff',
+    fontWeight: '700',
+    fontSize: 14,
+  },
+  loadingText: {
+    marginTop: 14,
+    color: '#64748B',
+    fontSize: 14,
   },
 });
