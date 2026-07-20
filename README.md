@@ -107,4 +107,9 @@
 
 ---
 
-## 📂 Project Structure
+## 📂 Author
+
+- Priya Sangwan
+
+---
+
